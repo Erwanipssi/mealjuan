@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Todo List</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    
+
+    <div class="form-container">
+        <form class="form" >
+          <div class="form-group">
+            <label for="titre">Titre</label>
+            <input required="" name="titre" id="title" type="text">
+          </div>
+          <div class="form-group">
+            <label for="categorie">categorie</label>
+            <input required="" name="categorie" id="categorie" type="text">
+          </div>
+          <div class="form-group">
+            <label for="textarea">description</label>
+            <textarea required="" cols="50" rows="10" id="description" name="textarea">          </textarea>
+          </div>
+          <button type="submit" id="btn" class="form-submit-btn">Submit</button>
+        </form>
+      </div>
+
+      <h1>Todo List</h1>
+      <input type="text" id="searchInput" placeholder="Rechercher...">
+      <select id="searchCriteria">
+          <option value="titre">Titre</option>
+          <option value="categorie">Catégorie</option>
+      </select>
+      <button type="button" id="searchButton">Rechercher</button>
+    </div>
+    
+      <div id="todoList">
+       
+      </div>
+
+    <script src="index.js"></script>
+
+</body>
+</html>
