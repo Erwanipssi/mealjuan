@@ -1,116 +1,120 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const todoListDiv = document.getElementById('todoList');
-    const form = document.querySelector('.form');
+    const searchForm = document.getElementById('searchForm');
+    const searchInput = document.getElementById('searchInput');
+    const searchResults = document.getElementById('searchResults');
+    const alphabet = document.getElementById('alphabet');
 
-    
-    async function fetchTodos() {
+    searchForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const searchTerm = searchInput.value.trim();
+        if (searchTerm === '') {
+            alert('Veuillez entrer un terme de recherche.');
+            return;
+        }
         try {
-            const response = await fetch('http://localhost:3001/todos');
-            const todos = await response.json();
-            displayTodos(todos);
+            const response = await fetch(`https://www.themealdb.com/api/json/v1/1/search.php?s=${searchTerm}`);
+            if (!response.ok) {
+                throw new Error('Erreur lors de la recherche de plats.');
+            }
+            const data = await response.json();
+            displayResults(data);
         } catch (error) {
-            console.error('Erreur lors de la récupération des Todos:', error);
+            console.error(error);
+            alert('Une erreur est survenue lors de la recherche.');
+        }
+    });
+
+    function displayResults(data) {
+        searchResults.innerHTML = '';
+        if (!data.meals) {
+            searchResults.innerHTML = '<p>Aucune recette trouvée.</p>';
+            return;
+        }
+        const cardContainer = document.createElement('div');
+        cardContainer.classList.add('card-container');
+        data.meals.forEach(meal => {
+            const card = document.createElement('div');
+            card.classList.add('card');
+    
+            const mealImage = document.createElement('img');
+            mealImage.src = meal.strMealThumb;
+            mealImage.alt = meal.strMeal;
+            mealImage.classList.add('card-image');
+            mealImage.addEventListener('click', () => displayRecipeInstructions(meal.strMeal));
+            card.appendChild(mealImage);
+    
+            const mealName = document.createElement('span');
+            mealName.textContent = meal.strMeal;
+            mealName.classList.add('card-name');
+            card.appendChild(mealName);
+    
+            const favoriteButton = document.createElement('button');
+            favoriteButton.textContent = 'Favoris';
+            favoriteButton.classList.add('card-favorite-button');
+            favoriteButton.addEventListener('click', () => addToFavorites(meal.strMeal));
+            card.appendChild(favoriteButton);
+    
+            cardContainer.appendChild(card);
+        });
+        searchResults.appendChild(cardContainer);
+    }
+    
+    async function displayRecipeInstructions(mealName) {
+        try {
+            const response = await fetch(`https://www.themealdb.com/api/json/v1/1/search.php?s=${mealName}`);
+            if (!response.ok) {
+                throw new Error('Erreur lors de la récupération des détails de la recette.');
+            }
+            const data = await response.json();
+            const recipeInstructions = data.meals[0].strInstructions;
+            alert(recipeInstructions); // Vous pouvez afficher les instructions dans une fenêtre modale ou une autre manière
+        } catch (error) {
+            console.error(error);
+            alert('Une erreur est survenue lors de la récupération des détails de la recette.');
         }
     }
+    
+  
+   
+    for (let i = 65; i <= 90; i++) {
+        const letter = String.fromCharCode(i);
+        const letterLink = document.createElement('a');
+        letterLink.textContent = letter;
+        letterLink.href = '#';
+        alphabet.appendChild(letterLink);
 
-
-    function displayTodos(todos) {
-        todoListDiv.innerHTML = ''; 
     
-        todos.forEach(todo => {
-            const todoDiv = document.createElement('div');
-            todoDiv.classList.add('todo');
-    
-            const titreElement = document.createElement('h2');
-            titreElement.textContent = `Titre: ${todo.titre}`;
-    
-            const descriptionElement = document.createElement('p');
-            descriptionElement.textContent = `Description: ${todo.description}`;
-    
-            const categorieElement = document.createElement('p');
-            categorieElement.textContent = `Catégorie: ${todo.categorie}`;
-    
-            const deleteButton = document.createElement('button');
-            deleteButton.textContent = 'Supprimer';
-            deleteButton.addEventListener('click', () => deleteTodo(todo.id));
-    
-            const editButton = document.createElement('button');
-            editButton.textContent = 'Modifier';
-            editButton.addEventListener('click', () => editTodo(todo));
-    
-            todoDiv.appendChild(titreElement);
-            todoDiv.appendChild(descriptionElement);
-            todoDiv.appendChild(categorieElement);
-            todoDiv.appendChild(deleteButton);
-            todoDiv.appendChild(editButton);
-    
-            todoListDiv.appendChild(todoDiv);
+        letterLink.addEventListener('click', async (event) => {
+            event.preventDefault();
+            try {
+                const response = await fetch(`https://www.themealdb.com/api/json/v1/1/search.php?f=${letter}`);
+                if (!response.ok) {
+                    throw new Error('Erreur lors de la recherche de recettes.');
+                }
+                const data = await response.json();
+                displayResults(data);
+            } catch (error) {
+                console.error(error);
+                alert('Une erreur est survenue lors de la recherche.');
+            }
         });
     }
-   
-    async function deleteTodo(id) {
+    async function addToFavorites(plat) {
         try {
-            const response = await fetch(`http://localhost:3001/todos/${id}`, {
-                method: 'DELETE'
-            });
-
-            if (!response.ok) {
-                throw new Error('Impossible de supprimer la Todo.');
-            }
-
-            console.log('Todo supprimée avec succès.');
-            fetchTodos(); 
-        } catch (error) {
-            console.error('Erreur lors de la suppression de la Todo:', error);
-        }
-    }
-
-   
-    function editTodo(todo) {
-        
-        console.log('Édition de la Todo:', todo);
-    }
-
-   
-    form.addEventListener('submit', async (event) => {
-        event.preventDefault();
-    
-        const titre = document.getElementById('title').value;
-        const categorie = document.getElementById('categorie').value;
-        const description = document.getElementById('description').value;
-    
-        try {
-            const response = await fetch('http://localhost:3001/todos', {
+            const response = await fetch('http://localhost:3005/ajouter-plat-favori', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ titre, description, categorie })
+                body: JSON.stringify({ plat }),
             });
-            
             if (!response.ok) {
-                throw new Error('Impossible d\'ajouter la Todo.');
+                throw new Error('Erreur lors de l\'ajout du plat en favoris.');
             }
-
-            console.log('Nouvelle Todo ajoutée avec succès.');
-            fetchTodos(); 
+            displayModal('Plat ajouté en favoris avec succès !');
         } catch (error) {
-            console.error('Erreur lors de l\'ajout de la Todo:', error);
+            console.error(error);
+            displayModal('Ce plat est déjà en favori.');
         }
-    });
-
-    searchButton.addEventListener('click', async () => {
-        const searchValue = searchInput.value;
-        const criteria = searchCriteria.value;
-    
-        try {
-            const response = await fetch(`http://localhost:3001/todos?${criteria}=${searchValue}`);
-            const todos = await response.json();
-            displayTodos(todos);
-        } catch (error) {
-            console.error('Erreur lors de la recherche des Todos:', error);
-        }
-    });
-    
-    fetchTodos();
+    }
 });

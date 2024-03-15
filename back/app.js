@@ -1,11 +1,10 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 require('dotenv').config();
-const cors = require ('cors');
-
+const cors = require('cors');
 
 const app = express();
-const port = 3001;
+const port = 3005;
 
 app.use(cors());
 app.use(bodyParser.json());
@@ -26,100 +25,56 @@ connection.connect((err) => {
     console.log('Connecté à la base de données MySQL.');
 });
 
-app.get('/todos', (req, res) => {
-    connection.query('SELECT * FROM todo', (error, results) => {
+app.get('/favoris', (req, res) => {
+    connection.query('SELECT id, plats FROM favoris', (error, results) => {
         if (error) {
-            console.error(error);
-            res.status(500).json({ message: 'Erreur lors de la récupération des Todos.' });
+            console.error(error); 
+            res.status(500).json({ message: 'Erreur lors de la récupération des favoris.' });
         } else {
             res.json(results);
         }
     });
 });
 
-app.post('/todos', (req, res) => {
-    const { titre, description, categorie } = req.body;
+app.post('/ajouter-plat-favori', (req, res) => {
+    const { plat } = req.body;
 
-    if (!titre || !description || !categorie) {
-        return res.status(400).json({ message: 'Tous les champs sont obligatoires.' });
-    }
-
-    const todo = { titre, description, categorie };
-
-    connection.query('INSERT INTO todo SET ?', todo, (error, results) => {
+   
+    connection.query('SELECT * FROM favoris WHERE plats = ?', [plat], (error, results) => {
         if (error) {
             console.error(error);
-            res.status(500).json({ message: 'Erreur lors de l\'insertion de la Todo.' });
+            res.status(500).json({ message: 'Erreur lors de la vérification des favoris.' });
+        } else if (results.length > 0) {
+            res.status(400).json({ message: 'Ce plat est déjà en favori.' });
         } else {
-            res.status(201).json({ message: 'Todo insérée avec succès.' });
+            
+            connection.query('INSERT INTO favoris (plats) VALUES (?)', [plat], (error, results) => {
+                if (error) {
+                    console.error(error);
+                    res.status(500).json({ message: 'Erreur lors de l\'ajout du plat en favori.' });
+                } else {
+                    res.status(200).json({ message: 'Plat ajouté en favori avec succès.' });
+                }
+            });
         }
     });
 });
 
+app.delete('/favoris/:id', (req, res) => {
+    const favorisId = req.params.id;
 
-app.put('/todos/:id', (req, res) => {
-    const id = req.params.id;
-    const { titre, description, categorie } = req.body;
-
-    if (!titre || !description || !categorie) {
-        return res.status(400).json({ message: 'Tous les champs sont obligatoires.' });
-    }
-
-    const updatedTodo = { titre, description, categorie };
-
-    connection.query('UPDATE todo SET ? WHERE id = ?', [updatedTodo, id], (error, results) => {
+    connection.query('DELETE FROM favoris WHERE id = ?', favorisId, (error, results) => {
         if (error) {
             console.error(error);
-            res.status(500).json({ message: 'Erreur lors de la mise à jour de la Todo.' });
+            res.status(500).json({ message: 'Erreur lors de la suppression du favori.' });
         } else if (results.affectedRows === 0) {
-            res.status(404).json({ message: 'La Todo spécifiée n\'existe pas.' });
+            res.status(404).json({ message: 'Le favori spécifié n\'existe pas.' });
         } else {
-            res.json({ message: 'Todo mise à jour avec succès.' });
+            res.status(200).json({ message: 'Favori supprimé avec succès.' });
         }
     });
 });
-
-
-app.delete('/todos/:id', (req, res) => {
-    const id = req.params.id;
-
-    connection.query('DELETE FROM todo WHERE id = ?', id, (error, results) => {
-        if (error) {
-            console.error(error);
-            res.status(500).json({ message: 'Erreur lors de la suppression de la Todo.' });
-        } else if (results.affectedRows === 0) {
-            res.status(404).json({ message: 'La Todo spécifiée n\'existe pas.' });
-        } else {
-            res.status(204).end();
-        }
-    });
-});
-
-
-app.get('/todos', (req, res) => {
-    const { titre, categorie } = req.query;
-    let queryString = 'SELECT * FROM todo';
-
-    if (titre && !categorie) {
-        queryString += ` WHERE titre LIKE '%${titre}%'`;
-    } else if (!titre && categorie) {
-        queryString += ` WHERE categorie LIKE '%${categorie}%'`;
-    } else if (titre && categorie) {
-        queryString += ` WHERE titre LIKE '%${titre}%' AND categorie LIKE '%${categorie}%'`;
-    }
-
-    connection.query(queryString, (error, results) => {
-        if (error) {
-            console.error(error);
-            res.status(500).json({ message: 'Erreur lors de la récupération des Todos.' });
-        } else {
-            res.json(results);
-        }
-    });
-});
-
-
-
 app.listen(port, () => {
     console.log(`Serveur en cours d'exécution sur http://localhost:${port}`);
 });
+

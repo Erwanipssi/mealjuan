@@ -9,38 +9,49 @@
 <body>
     
 
-    <div class="form-container">
-        <form class="form" >
-          <div class="form-group">
-            <label for="titre">Titre</label>
-            <input required="" name="titre" id="title" type="text">
-          </div>
-          <div class="form-group">
-            <label for="categorie">categorie</label>
-            <input required="" name="categorie" id="categorie" type="text">
-          </div>
-          <div class="form-group">
-            <label for="textarea">description</label>
-            <textarea required="" cols="50" rows="10" id="description" name="textarea">          </textarea>
-          </div>
-          <button type="submit" id="btn" class="form-submit-btn">Submit</button>
-        </form>
-      </div>
+  <a href="./favoris.html"> <img src="./icons8-boutique-48.png" alt="" srcset=""></a>
+    <h1>Recherche de recettes</h1>
+    <form id="searchForm" method="post">
+        <input type="text" id="searchInput" placeholder="Rechercher une recette...">
+        <button type="submit">Rechercher</button>
+    </form>
+    <div id="searchResults"></div>
 
-      <h1>Todo List</h1>
-      <input type="text" id="searchInput" placeholder="Rechercher...">
-      <select id="searchCriteria">
-          <option value="titre">Titre</option>
-          <option value="categorie">Catégorie</option>
-      </select>
-      <button type="button" id="searchButton">Rechercher</button>
-    </div>
+   
+
+
+    <footer id="footer">
+      <ul id="alphabet">
     
-      <div id="todoList">
-       
-      </div>
+      </ul>
+  </footer>
 
-    <script src="index.js"></script>
+  <div id="myModal" class="modal">
+    <div class="modal-content">
+        <span id="modalMessage"></span>
+        <button id="modalClose">Fermer</button>
+    </div>
+</div>
 
+
+
+<script>
+   
+    const modal = document.getElementById('myModal');
+    const modalMessage = document.getElementById('modalMessage');
+    const modalClose = document.getElementById('modalClose');
+
+    modalClose.onclick = function() {
+        modal.style.display = 'none';
+    };
+
+  
+    function displayModal(message) {
+        modalMessage.textContent = message;
+        modal.style.display = 'block';
+    }
+</script>
+
+  <script src="index.js"></script>
 </body>
 </html>
