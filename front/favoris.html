@@ -5,42 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mes Favoris</title>
     <link rel="stylesheet" href="style.css">
-    <style>
-        #favorisContainer {
-            width: 500px;
-            height: 100px;
-            margin: 0 auto; 
-            display: flex;
-          flex-wrap: wrap;
-          justify-content: space-between;
-        }
-        .favori-wrapper {
-            border: 1px solid #eeeeee;
-            background-color: black;
-            padding: 10px;
-            margin-bottom: 20px;
-            border-radius: 10px;
-            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1); 
-        }
-        .favori-name {
-            position: relative;
-            font-size: 18px;
-            color: white;
-            
-        }
-        button {
-            position: relative;
-            font-size: 18px;
-            border-radius: 10px;
-            background-color: red;
-            top: 50px;
-            border-style: none;
-            color: rgb(255, 255, 255);
-        }
-    </style>
+    
 </head>
 <body>
+    <img class="background" style="position: absolute; width: 100%; height: 100%; z-index: -10; top: 0" src="./jr-korpa-YXQew2KZjzY-unsplash.jpg" alt="">
+    <a href="./index.html"><img src="./icons8-hamburger-64.png" alt=""></a>
     <h1>Mes Favoris</h1>
+   
     <div id="favorisContainer"></div>
 
     <div id="myModal" class="modal">
@@ -51,78 +22,6 @@
         </div>
     </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', async () => {
-            try {
-                const response = await fetch('http://localhost:3005/favoris');
-                if (!response.ok) {
-                    throw new Error('Erreur lors de la récupération des favoris.');
-                }
-                const data = await response.json();
-                displayFavorites(data);
-            } catch (error) {
-                console.error(error);
-                alert('Une erreur est survenue lors de la récupération des favoris.');
-            }
-        });
-
-        function displayFavorites(data) {
-            const favorisContainer = document.getElementById('favorisContainer');
-            favorisContainer.innerHTML = '';
-            data.forEach(favori => {
-                const divWrapper = document.createElement('div');
-                divWrapper.classList.add('favori-wrapper');
-
-                const nomPlat = document.createElement('span');
-                nomPlat.textContent = favori.plats; 
-                nomPlat.classList.add('favori-name');
-                divWrapper.appendChild(nomPlat);
-
-                const deleteButton = document.createElement('button');
-                deleteButton.textContent = 'Supprimer';
-                deleteButton.addEventListener('click', () => displayModal(favori.id));
-                divWrapper.appendChild(deleteButton);
-
-                favorisContainer.appendChild(divWrapper);
-            });
-        }
-
-        async function deleteFavorite(favoriId) {
-            try {
-                const response = await fetch(`http://localhost:3005/favoris/${favoriId}`, {
-                    method: 'DELETE'
-                });
-                if (!response.ok) {
-                    throw new Error('Erreur lors de la suppression du favori.');
-                }
-                closeModal(); 
-
-                const updatedResponse = await fetch('http://localhost:3005/favoris');
-                const updatedData = await updatedResponse.json();
-                displayFavorites(updatedData);
-            } catch (error) {
-                console.error(error);
-                alert('Une erreur est survenue lors de la suppression du favori.');
-            }
-        }
-
-        const modal = document.getElementById('myModal');
-        const confirmDeleteButton = document.getElementById('confirmDelete');
-        const cancelDeleteButton = document.getElementById('cancelDelete');
-
-        function displayModal(favoriId) {
-            modal.style.display = 'block';
-           
-            confirmDeleteButton.addEventListener('click', () => deleteFavorite(favoriId));
-        }
-
-        function closeModal() {
-            modal.style.display = 'none';
-          
-            confirmDeleteButton.removeEventListener('click', deleteFavorite);
-        }
-
-        cancelDeleteButton.addEventListener('click', closeModal);
-    </script>
+    <script src="delete.js"></script>
 </body>
 </html>

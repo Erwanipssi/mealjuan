@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
         event.preventDefault();
         const searchTerm = searchInput.value.trim();
         if (searchTerm === '') {
-            alert('Veuillez entrer un terme de recherche.');
+            displayErrorMessage('Veuillez entrer un terme de recherche.');
             return;
         }
         try {
@@ -20,7 +20,22 @@ document.addEventListener('DOMContentLoaded', () => {
             displayResults(data);
         } catch (error) {
             console.error(error);
-            alert('Une erreur est survenue lors de la recherche.');
+            displayErrorMessage('Une erreur est survenue lors de la recherche.');
+        }
+    });
+
+    searchInput.addEventListener('input', async () => {
+        const searchTerm = searchInput.value.trim();
+        try {
+            const response = await fetch(`https://www.themealdb.com/api/json/v1/1/search.php?f=${searchTerm}`);
+            if (!response.ok) {
+                throw new Error('Erreur lors de la recherche de recettes.');
+            }
+            const data = await response.json();
+            displayResults(data);
+        } catch (error) {
+            console.error(error);
+            displayErrorMessage('Une erreur est survenue lors de la recherche.');
         }
     });
 
@@ -67,10 +82,10 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             const data = await response.json();
             const recipeInstructions = data.meals[0].strInstructions;
-            alert(recipeInstructions); // Vous pouvez afficher les instructions dans une fenêtre modale ou une autre manière
+            alert(recipeInstructions); 
         } catch (error) {
             console.error(error);
-            alert('Une erreur est survenue lors de la récupération des détails de la recette.');
+            displayErrorMessage('Une erreur est survenue lors de la récupération des détails de la recette.');
         }
     }
     
@@ -95,7 +110,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 displayResults(data);
             } catch (error) {
                 console.error(error);
-                alert('Une erreur est survenue lors de la recherche.');
+                displayErrorMessage('Une erreur est survenue lors de la recherche.');
             }
         });
     }
@@ -117,4 +132,6 @@ document.addEventListener('DOMContentLoaded', () => {
             displayModal('Ce plat est déjà en favori.');
         }
     }
+
+  
 });
